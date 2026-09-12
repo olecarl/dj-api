@@ -9,7 +9,7 @@ corepack_enable: false
 
 # Key features of DDEV's config.yaml:
 
-name: api
+name: dj-api
 #   http://projectname.ddev.site and https://projectname.ddev.site
 # If the name is omitted, the project will take the name of the enclosing directory,
 # which is useful if you want to have a copy of the project side by side with this one.
