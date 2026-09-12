@@ -1,0 +1,151 @@
+{
+    "type": "symfony",
+    "name": "olecarl/api",
+    "description": "RESTful Web-API using Symfony with API-Platform",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.5",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-pdo_sqlite": "*",
+        "api-platform/doctrine-orm": "^4.3.17",
+        "api-platform/hal": "^4.3.17",
+        "api-platform/json-api": "^4.3.17",
+        "api-platform/symfony": "^4.3.17",
+        "doctrine/doctrine-bundle": "^3.3.1",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.6.8",
+        "lexik/jwt-authentication-bundle": "^3.2",
+        "nelmio/cors-bundle": "^2.6.1",
+        "phpdocumentor/reflection-docblock": "^6.0.3",
+        "phpstan/phpdoc-parser": "^2.3.3",
+        "stof/doctrine-extensions-bundle": "^1.15.3",
+        "symfony/asset": "^8.1.0",
+        "symfony/asset-mapper": "^8.1.2",
+        "symfony/console": "^8.1.4",
+        "symfony/dotenv": "^8.1.2",
+        "symfony/expression-language": "^8.1.1",
+        "symfony/flex": "^2.11",
+        "symfony/form": "^8.1.4",
+        "symfony/framework-bundle": "^8.1.4",
+        "symfony/mailer": "^8.1.2",
+        "symfony/monolog-bundle": "^4.0.2",
+        "symfony/object-mapper": "^8.1.4",
+        "symfony/property-access": "^8.1.4",
+        "symfony/property-info": "^8.1.4",
+        "symfony/rate-limiter": "^8.1.4",
+        "symfony/requirements-checker": "^2.0.3",
+        "symfony/runtime": "^8.1.0",
+        "symfony/security-bundle": "^8.1.2",
+        "symfony/serializer": "^8.1.4",
+        "symfony/twig-bundle": "^8.1.2",
+        "symfony/validator": "^8.1.4",
+        "symfony/yaml": "^8.1.2",
+        "webmozart/assert": "^2.4.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true
+        },
+        "bump-after-update": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "replace": {
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-php74": "*",
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*"
+    },
+    "scripts": {
+        "build": [
+            "@prepare",
+            "@lint",
+            "@check",
+            "@test"
+        ],
+        "prepare": [
+            "composer validate --strict",
+            "vendor/bin/php-cs-fixer fix"
+        ],
+        "lint": [
+            "bin/console lint:container",
+            "bin/console lint:twig templates"
+        ],
+        "check": [
+            "vendor/bin/php-cs-fixer check --diff",
+            "vendor/bin/phpstan analyse",
+            "vendor/bin/psalm"
+        ],
+        "test": [
+            "bin/console --env=test doctrine:schema:validate",
+            "vendor/bin/codecept run --fail-fast"
+        ],
+        "report": [
+            "vendor/bin/codecept run --html",
+            "vendor/bin/phpmetrics --git --report-html=./build/phpmetrics/ ."
+        ],
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd",
+            "importmap:install": "symfony-cmd"
+        },
+
+        "post-install-cmd": [
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts"
+        ]
+    },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "^8.0"
+        }
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.3.5",
+        "codeception/module-asserts": "^3.3.0",
+        "codeception/module-doctrine": "^3.3",
+        "codeception/module-phpbrowser": "^4.1",
+        "codeception/module-rest": "^3.4.3",
+        "codeception/module-symfony": "^3.10.1",
+        "doctrine/doctrine-fixtures-bundle": "^4.3.1",
+        "friendsofphp/php-cs-fixer": "^3.95.18",
+        "phpmetrics/phpmetrics": "^2.11.0",
+        "phpstan/phpstan": "^2.2.8",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^12.5.33",
+        "psalm/plugin-symfony": "^5.3",
+        "symfony/browser-kit": "^8.1.1",
+        "symfony/css-selector": "^8.1.0",
+        "symfony/maker-bundle": "^1.67.0",
+        "symfony/panther": "^2.4",
+        "symfony/stopwatch": "^8.1.0",
+        "symfony/web-profiler-bundle": "^8.1.4",
+        "vimeo/psalm": "^6.16.1",
+        "zenstruck/foundry": "^2.12.0"
+    }
+}

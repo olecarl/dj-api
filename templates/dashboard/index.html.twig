@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+    <main>
+        <h1>Dashboard</h1>
+
+        <p>Signed in as {{ app.user.userIdentifier }}</p>
+
+        {% if app.user.userProfile and app.user.userProfile.about %}
+        <h2>About</h2>
+        <p>{{ app.user.userProfile.about }}</p>
+        {% endif %}
+
+        <h2>Your roles</h2>
+        <ul>
+            {% for role in app.user.roles %}
+                <li>{{ role }}</li>
+            {% endfor %}
+        </ul>
+
+        <p><a href="{{ path('api_doc') }}">API documentation</a></p>
+
+        <form method="post" action="{{ path('app_logout') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+            <button type="submit">Log out</button>
+        </form>
+    </main>
+{% endblock %}
