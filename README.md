@@ -2,9 +2,10 @@
 
 [![Symfony](https://github.com/olecarl/api/actions/workflows/symfony.yml/badge.svg?branch=master)](https://github.com/olecarl/api/actions/workflows/symfony.yml)
 
-A Symfony 8 REST API built with API Platform 4. The application exposes user
-and user-profile resources, authenticates API clients with JWTs, and includes a
-small session-based browser dashboard for human users. Local development runs
+A Symfony 8 REST API built with API Platform 4. The application exposes user,
+user-profile, and schema.org-based music resources, authenticates API clients
+with JWTs, and includes a small session-based browser dashboard for human
+users. Local development runs
 inside DDEV and uses PostgreSQL; automated tests use SQLite.
 
 ## Big Picture
@@ -117,10 +118,36 @@ The main local URL is `https://api.ddev.site`.
 | `GET` | `/users/{uuid}` | The user themselves or `ROLE_ADMIN` |
 | `GET` | `/me` | Any authenticated API user |
 | `GET` | `/users/{userId}/profile` | The profile owner or `ROLE_ADMIN` |
+| `GET` | `/music` | Any authenticated API user |
+| `GET` | `/music/{uuid}` | Any authenticated API user |
+| `GET` | `/music/recordings` | Any authenticated API user |
+| `GET` | `/music/recordings/{uuid}` | Any authenticated API user |
+| `GET` | `/music/albums` | Any authenticated API user |
+| `GET` | `/music/albums/{uuid}` | Any authenticated API user |
+| `GET` | `/music/artists` | Any authenticated API user |
+| `GET` | `/music/artists/{uuid}` | Any authenticated API user |
 
 The user API is currently read-only. Password hashes are stored on the
 Doctrine entity but are not fields on the API DTO and therefore are never
 returned by these endpoints.
+
+### Music resources
+
+The music API is read-only and follows the related schema.org types:
+
+- `MusicPlaylist` is exposed at `/music` and contains an ordered `track`
+  `ItemList` with `ListItem` entries.
+- `MusicRecording` is exposed at `/music/recordings` and may reference an
+  album and one or more `MusicGroup` artists.
+- `MusicAlbum` is exposed at `/music/albums` and contains ordered recordings.
+- `MusicGroup` is exposed at `/music/artists` and represents bands as well as
+  solo musicians.
+
+Playlist and album track positions are persisted explicitly. Related albums
+and artists are serialized as canonical resource IRIs where expanding them
+would create recursive response graphs. All music resources use UUID
+identifiers and the schema.org RDF types are included in JSON-LD responses and
+OpenAPI documentation.
 
 The `/users` collection supports API Platform pagination through the `items`
 query parameter. The configured maximum page size is 50:

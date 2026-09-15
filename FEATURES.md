@@ -76,6 +76,33 @@ The profile API is read-only:
 `UserProfileProvider` loads the linked user and profile and returns a profile
 DTO containing a nested public user DTO. A missing user or profile returns 404.
 
+## Music Resources
+
+The music API is a read-only, authenticated API based on schema.org music
+types:
+
+| Method | Path | Schema.org type |
+|--------|------|-----------------|
+| `GET` | `/music` | `MusicPlaylist` collection |
+| `GET` | `/music/{uuid}` | `MusicPlaylist` |
+| `GET` | `/music/recordings` | `MusicRecording` collection |
+| `GET` | `/music/recordings/{uuid}` | `MusicRecording` |
+| `GET` | `/music/albums` | `MusicAlbum` collection |
+| `GET` | `/music/albums/{uuid}` | `MusicAlbum` |
+| `GET` | `/music/artists` | `MusicGroup` collection |
+| `GET` | `/music/artists/{uuid}` | `MusicGroup` |
+
+`MusicPlaylist.track` is represented as an `ItemList` containing ordered
+`ListItem` values. Each list item contains a `MusicRecording`. Recordings may
+refer to a `MusicAlbum` through `inAlbum` and to one or more `MusicGroup`
+values through `byArtist`. Albums contain ordered recordings and artists
+expose related albums and recordings as resource references to avoid recursive
+serialization.
+
+The Doctrine model persists playlists, recordings, albums, artists, playlist
+positions, album positions, and the many-to-many artist relationships. The
+`numTracks` value is derived from the persisted playlist entries.
+
 ## Browser Dashboard
 
 The browser UI uses Symfony's session-based firewall and is separate from JWT
