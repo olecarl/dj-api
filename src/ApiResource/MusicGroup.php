@@ -14,7 +14,7 @@ use Symfony\Component\Uid\Uuid;
 
 /** @psalm-api */
 #[ApiResource(
-    shortName: 'Music/Artist',
+    shortName: 'Music',
     types: ['https://schema.org/MusicGroup'],
     operations: [
         new GetCollection(uriTemplate: '/music/artists', security: "is_granted('ROLE_USER')"),
