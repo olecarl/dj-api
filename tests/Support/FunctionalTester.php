@@ -13,7 +13,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Support;
 
+use App\Entity\User;
+use App\Entity\UserProfile;
 use Codeception\Actor;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Inherited Methods.
@@ -32,4 +36,42 @@ use Codeception\Actor;
 final class FunctionalTester extends Actor
 {
     use _generated\FunctionalTesterActions;
+
+    /**
+     * @param list<string> $roles
+     */
+    public function haveUser(
+        string $email,
+        string $password = 'correct horse battery staple',
+        array $roles = [],
+    ): User {
+        $user = (new User())->setEmail($email)->setRoles($roles);
+        $user->setPassword($this->grabService(UserPasswordHasherInterface::class)->hashPassword($user, $password));
+
+        $entityManager = $this->grabService(EntityManagerInterface::class);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $user;
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function haveUserWithProfile(
+        string $email,
+        string $password,
+        string $about,
+        array $roles = [],
+    ): User {
+        $user = $this->haveUser($email, $password, $roles);
+        $profile = (new UserProfile())->setUser($user)->setAbout($about);
+        $user->setUserProfile($profile);
+
+        $entityManager = $this->grabService(EntityManagerInterface::class);
+        $entityManager->persist($profile);
+        $entityManager->flush();
+
+        return $user;
+    }
 }

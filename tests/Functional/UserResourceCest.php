@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Entity\User;
 use App\Tests\Support\FunctionalTester;
-use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserResourceCest
 {
     public function testAuthenticatedUserCanReadOwnProfileWithoutPassword(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/users/'.$user->getId());
 
@@ -29,7 +26,7 @@ final class UserResourceCest
 
     public function testAuthenticatedUserCanReadOwnProfileAtMe(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/me');
 
@@ -44,8 +41,8 @@ final class UserResourceCest
 
     public function testMeReturnsTheAuthenticatedUsersOwnProfile(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
-        $otherUser = $this->createUser($I, 'other@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
+        $otherUser = $I->haveUser('other@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($otherUser, 'api');
         $I->sendGet('/me');
 
@@ -56,7 +53,7 @@ final class UserResourceCest
 
     public function testAdministratorCanReadOwnProfileAtMe(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/me');
 
@@ -73,7 +70,7 @@ final class UserResourceCest
 
     public function testMeDoesNotAcceptAUserIdentifierInThePath(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/me/'.$user->getId());
 
@@ -82,8 +79,8 @@ final class UserResourceCest
 
     public function testMeIgnoresUserIdentifierQueryParameters(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
-        $otherUser = $this->createUser($I, 'other@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
+        $otherUser = $I->haveUser('other@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/me?userId='.$otherUser->getId());
 
@@ -94,7 +91,7 @@ final class UserResourceCest
 
     public function testMeUsesCanonicalUserIri(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $token = $I->grabService(JWTTokenManagerInterface::class)->create($user);
 
         foreach ([
@@ -120,8 +117,8 @@ final class UserResourceCest
 
     public function testAuthenticatedUserCannotReadAnotherProfile(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
-        $otherUser = $this->createUser($I, 'other@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
+        $otherUser = $I->haveUser('other@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/users/'.$otherUser->getId());
 
@@ -130,8 +127,8 @@ final class UserResourceCest
 
     public function testAdministratorCanReadAnotherProfile(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
-        $otherUser = $this->createUser($I, 'other@example.com', 'correct horse battery staple');
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $otherUser = $I->haveUser('other@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users/'.$otherUser->getId());
 
@@ -141,7 +138,7 @@ final class UserResourceCest
 
     public function testUserCollectionRequiresAdministratorRole(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/users');
 
@@ -150,9 +147,9 @@ final class UserResourceCest
 
     public function testAdministratorCanReadPaginatedUserCollection(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
-        $this->createUser($I, 'first@example.com', 'correct horse battery staple');
-        $this->createUser($I, 'second@example.com', 'correct horse battery staple');
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $I->haveUser('first@example.com', 'correct horse battery staple');
+        $I->haveUser('second@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($admin, 'api');
 
         $I->sendGet('/users?items=1');
@@ -180,7 +177,7 @@ final class UserResourceCest
 
     public function testMissingUserCannotBeRead(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/users/00000000-0000-4000-8000-000000000000');
 
@@ -189,25 +186,10 @@ final class UserResourceCest
 
     public function testInvalidUserIdentifierCannotBeRead(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($user, 'api');
         $I->sendGet('/users/not-a-uuid');
 
         $I->seeResponseCodeIs(404);
-    }
-
-    /**
-     * @param list<string> $roles
-     */
-    private function createUser(FunctionalTester $I, string $email, string $password, array $roles = []): User
-    {
-        $user = (new User())->setEmail($email)->setRoles($roles);
-        $user->setPassword($I->grabService(UserPasswordHasherInterface::class)->hashPassword($user, $password));
-
-        $entityManager = $I->grabService(EntityManagerInterface::class);
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $user;
     }
 }

@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Entity\User;
 use App\Tests\Support\FunctionalTester;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class DashboardCest
 {
@@ -21,7 +18,7 @@ final class DashboardCest
 
     public function testUserCanLoginAndSeeDashboard(FunctionalTester $I): void
     {
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $I->haveUser('user@example.com', 'correct horse battery staple');
 
         $I->amOnPage('/login');
         $I->submitForm('form', [
@@ -36,7 +33,7 @@ final class DashboardCest
 
     public function testLoginReturnsUserToOriginallyRequestedDashboard(FunctionalTester $I): void
     {
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $I->haveUser('user@example.com', 'correct horse battery staple');
 
         $I->amOnPage('/dashboard');
         $I->submitForm('form', [
@@ -49,7 +46,7 @@ final class DashboardCest
 
     public function testInvalidCredentialsRedisplayLoginError(FunctionalTester $I): void
     {
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $I->haveUser('user@example.com', 'correct horse battery staple');
 
         $I->amOnPage('/login');
         $I->submitForm('form', [
@@ -61,9 +58,22 @@ final class DashboardCest
         $I->see('Invalid email or password.');
     }
 
+    public function testLoginRequiresCsrfToken(FunctionalTester $I): void
+    {
+        $I->haveUser('user@example.com', 'correct horse battery staple');
+        $I->sendPost('/login', [
+            '_username' => 'user@example.com',
+            '_password' => 'correct horse battery staple',
+        ]);
+
+        $I->amOnPage('/dashboard');
+
+        $I->seeCurrentUrlEquals('/login');
+    }
+
     public function testUserCanLogout(FunctionalTester $I): void
     {
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $I->haveUser('user@example.com', 'correct horse battery staple');
 
         $I->amOnPage('/login');
         $I->submitForm('form', [
@@ -77,15 +87,18 @@ final class DashboardCest
         $I->seeCurrentUrlEquals('/login');
     }
 
-    private function createUser(FunctionalTester $I, string $email, string $password): User
+    public function testLogoutRequiresCsrfToken(FunctionalTester $I): void
     {
-        $user = (new User())->setEmail($email);
-        $user->setPassword($I->grabService(UserPasswordHasherInterface::class)->hashPassword($user, $password));
+        $I->haveUser('user@example.com', 'correct horse battery staple');
+        $I->amOnPage('/login');
+        $I->submitForm('form', [
+            '_username' => 'user@example.com',
+            '_password' => 'correct horse battery staple',
+        ]);
 
-        $entityManager = $I->grabService(EntityManagerInterface::class);
-        $entityManager->persist($user);
-        $entityManager->flush();
+        $I->sendPost('/logout', []);
+        $I->amOnPage('/dashboard');
 
-        return $user;
+        $I->see('Signed in as user@example.com');
     }
 }

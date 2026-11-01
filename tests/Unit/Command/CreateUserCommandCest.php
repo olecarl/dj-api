@@ -51,6 +51,30 @@ final class CreateUserCommandCest
         $I->assertStringContainsString('was created', $tester->getDisplay());
     }
 
+    public function testCommandPromptsForAndNormalizesEmail(UnitTester $I): void
+    {
+        $persistedUser = null;
+        $entityManager = Stub::makeEmpty(EntityManagerInterface::class, [
+            'persist' => Expected::once(static function (User $user) use (&$persistedUser): void {
+                $persistedUser = $user;
+            }),
+            'flush' => Expected::once(),
+            'wrapInTransaction' => Expected::once(static fn (callable $operation): mixed => $operation()),
+        ]);
+        $userRepository = Stub::makeEmpty(UserRepositoryInterface::class, ['findOneBy' => Expected::once(null)]);
+        $passwordHasher = Stub::makeEmpty(UserPasswordHasherInterface::class, ['hashPassword' => Expected::once('hashed-password')]);
+        $validator = Stub::makeEmpty(ValidatorInterface::class, ['validate' => Expected::once(new ConstraintViolationList())]);
+
+        $tester = $this->createTester($entityManager, $userRepository, $passwordHasher, $validator);
+        $tester->setInputs(['  USER@EXAMPLE.COM  ', 'long-enough-password', 'long-enough-password']);
+
+        $status = $tester->execute([]);
+
+        $I->assertSame(Command::SUCCESS, $status);
+        $I->assertSame('user@example.com', $persistedUser?->getEmail());
+        $I->assertStringContainsString('was created', $tester->getDisplay());
+    }
+
     public function testCommandRejectsNonInteractiveExecution(UnitTester $I): void
     {
         $tester = $this->createTester(

@@ -1,4 +1,4 @@
-Feature: View my own user profile
+Feature: View my own account
   As an authenticated user
   I want to view my own profile through a dedicated endpoint
   So that I do not need to know or provide my user ID

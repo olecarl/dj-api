@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Symfony 8.1 + API Platform 4.3 REST API. Local development uses DDEV with PHP
+Symfony 8.1 + API Platform 4.4 REST API. Local development uses DDEV with PHP
 8.5, Nginx/FPM, and PostgreSQL 17. The public API uses a DTO-first design and
 the browser dashboard uses a separate session-based firewall.
 
@@ -113,7 +113,7 @@ src/
 tests/
   Unit/         Isolated component tests
   Functional/   Symfony kernel, HTTP, Doctrine, security, and serialization
-  Acceptance/   PhpBrowser tests against https://api.ddev.site
+  Acceptance/   PhpBrowser smoke tests against https://dj-api.ddev.site
 ```
 
 Symfony discovers application services from `src/` through
@@ -207,13 +207,14 @@ Read these tests for examples:
 
 ## CI
 
-`.github/workflows/symfony.yml` runs on pushes to `master` and `develop` and
-on pull requests targeting `master`. It uses PHP 8.5, installs dependencies
-with `composer update`, creates the SQLite test database, runs `composer
-check`, and executes:
+`.github/workflows/symfony.yml` runs on pushes to `main` and on pull requests
+targeting `main`. It uses PHP 8.5, installs locked dependencies with
+`composer install`, creates the SQLite test database, runs `composer check`,
+and executes the Unit and Functional suites separately:
 
 ```bash
-vendor/bin/codecept run --fail-fast Unit Functional
+vendor/bin/codecept run --fail-fast Unit
+vendor/bin/codecept run --fail-fast Functional
 ```
 
 ## Contributor Guidance

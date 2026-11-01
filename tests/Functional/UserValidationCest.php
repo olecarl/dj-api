@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Entity\User;
+use App\Entity\UserProfile;
 use App\Tests\Support\FunctionalTester;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -52,6 +53,14 @@ final class UserValidationCest
             'Roles must use the ROLE_ prefix and uppercase characters.',
             $violations->get(0)->getMessage(),
         );
+    }
+
+    public function testProfileRequiresAUser(FunctionalTester $I): void
+    {
+        $violations = $I->grabService(ValidatorInterface::class)->validate(new UserProfile());
+        $messages = array_map(static fn ($violation): string => $violation->getMessage(), iterator_to_array($violations));
+
+        $I->assertContains('A user is required.', $messages);
     }
 
     public function testUserEmailMustBeUnique(FunctionalTester $I): void

@@ -8,14 +8,13 @@ use App\Entity\User;
 use App\Tests\Support\FunctionalTester;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class ApiContractCest
 {
     public function testCollectionContainsExpectedFieldsAndNoPassword(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users');
 
@@ -33,7 +32,7 @@ final class ApiContractCest
 
     public function testEmptyCollectionHasZeroItems(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $this->deleteAllUsers($I);
         $I->sendGet('/users');
@@ -46,9 +45,9 @@ final class ApiContractCest
 
     public function testSecondPageReturnsDifferentItem(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
-        $this->createUser($I, 'first@example.com', 'correct horse battery staple');
-        $this->createUser($I, 'second@example.com', 'correct horse battery staple');
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $I->haveUser('first@example.com', 'correct horse battery staple');
+        $I->haveUser('second@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($admin, 'api');
 
         $I->sendGet('/users?items=1&page=2');
@@ -61,8 +60,8 @@ final class ApiContractCest
 
     public function testPageBeyondCollectionIsEmpty(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $I->haveUser('user@example.com', 'correct horse battery staple');
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users?items=1&page=3');
 
@@ -74,9 +73,9 @@ final class ApiContractCest
 
     public function testPaginationMaximumIsEnforced(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         for ($index = 1; $index <= 55; ++$index) {
-            $this->createUser($I, \sprintf('user%d@example.com', $index), 'correct horse battery staple');
+            $I->haveUser(\sprintf('user%d@example.com', $index), 'correct horse battery staple');
         }
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users?items=51');
@@ -89,7 +88,7 @@ final class ApiContractCest
 
     public function testZeroItemsReturnsEmptyPage(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users?items=0');
 
@@ -101,7 +100,7 @@ final class ApiContractCest
 
     public function testNegativeItemsAreRejected(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/users?items=-1');
 
@@ -110,7 +109,7 @@ final class ApiContractCest
 
     public function testApiSupportsConfiguredResponseFormats(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $formats = [
             'application/ld+json',
             'application/hal+json',
@@ -136,7 +135,7 @@ final class ApiContractCest
 
     public function testUnsupportedResponseFormatIsRejected(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->haveHttpHeader('Accept', 'application/octet-stream');
         $I->sendGet('/users');
@@ -156,7 +155,7 @@ final class ApiContractCest
 
     public function testOpenApiUsesVersionlessPaths(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/docs.jsonopenapi');
 
@@ -168,7 +167,7 @@ final class ApiContractCest
 
     public function testOpenApiDocumentsUserProfileSubresource(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/docs.jsonopenapi');
 
@@ -179,7 +178,7 @@ final class ApiContractCest
 
     public function testOpenApiDocumentsMeWithoutAnIdentifier(FunctionalTester $I): void
     {
-        $admin = $this->createUser($I, 'admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
+        $admin = $I->haveUser('admin@example.com', 'correct horse battery staple', ['ROLE_ADMIN']);
         $I->amLoggedInAs($admin, 'api');
         $I->sendGet('/docs.jsonopenapi');
 
@@ -214,21 +213,6 @@ final class ApiContractCest
         $I->seeHttpHeader('Access-Control-Allow-Origin', 'https://localhost');
         $I->seeHttpHeader('Access-Control-Allow-Methods');
         $I->seeHttpHeader('Access-Control-Allow-Headers');
-    }
-
-    /**
-     * @param list<string> $roles
-     */
-    private function createUser(FunctionalTester $I, string $email, string $password, array $roles = []): User
-    {
-        $user = (new User())->setEmail($email)->setRoles($roles);
-        $user->setPassword($I->grabService(UserPasswordHasherInterface::class)->hashPassword($user, $password));
-
-        $entityManager = $I->grabService(EntityManagerInterface::class);
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $user;
     }
 
     private function deleteAllUsers(FunctionalTester $I): void

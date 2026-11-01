@@ -1,6 +1,6 @@
 # RESTful Web API Framework
 
-[![Symfony](https://github.com/olecarl/api/actions/workflows/symfony.yml/badge.svg?branch=master)](https://github.com/olecarl/api/actions/workflows/symfony.yml)
+[![Symfony](https://github.com/olecarl/dj-api/actions/workflows/symfony.yml/badge.svg?branch=main)](https://github.com/olecarl/dj-api/actions/workflows/symfony.yml)
 
 A Symfony 8 REST API built with API Platform 4. The application exposes user
 and user-profile resources, authenticates API clients with JWTs, and includes a
@@ -34,9 +34,9 @@ providers, Doctrine, security, and serialization to handle each request.
 | Category | Technology |
 |----------|------------|
 | Language | PHP 8.5 |
-| Framework | Symfony 8.1, API Platform 4.3 |
+| Framework | Symfony 8.1, API Platform 4.4 |
 | Database | PostgreSQL 17 in development, SQLite in tests |
-| ORM | Doctrine ORM 3.6 |
+| ORM | Doctrine ORM 3.7 |
 | Authentication | LexikJWTAuthenticationBundle and Symfony Security |
 | Testing | Codeception 5.3, PHPUnit 12.5 |
 | Static analysis | PHPStan level max, Psalm error level 1 |
@@ -49,14 +49,14 @@ providers, Doctrine, security, and serialization to handle each request.
 - [DDEV](https://ddev.com)
 
 DDEV is configured in `.ddev/config.yaml` with PHP 8.5, an Nginx/FPM
-webserver, PostgreSQL 17, and the `api.ddev.site` hostname.
+webserver, PostgreSQL 17, and the `dj-api.ddev.site` hostname.
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/olecarl/api
-cd api
+git clone https://github.com/olecarl/dj-api
+cd dj-api
 
 # Start the PHP and PostgreSQL containers
 ddev start
@@ -104,7 +104,7 @@ ddev console about
 ddev adminer
 ```
 
-The main local URL is `https://api.ddev.site`.
+The main local URL is `https://dj-api.ddev.site`.
 
 ## API
 
@@ -134,7 +134,7 @@ query parameter. The configured maximum page size is 50:
 Request a token with the user's email in the `username` field:
 
 ```bash
-curl -X POST https://api.ddev.site/login_check \
+curl -X POST https://dj-api.ddev.site/login_check \
     -H 'Content-Type: application/json' \
     -d '{"username":"user@example.com","password":"your-password"}'
 ```
@@ -142,10 +142,10 @@ curl -X POST https://api.ddev.site/login_check \
 Use the returned token on API requests:
 
 ```bash
-curl https://api.ddev.site/me \
+curl https://dj-api.ddev.site/me \
     -H 'Authorization: Bearer <token>'
 
-curl https://api.ddev.site/users \
+curl https://dj-api.ddev.site/users \
     -H 'Authorization: Bearer <token>'
 ```
 
@@ -164,7 +164,7 @@ API Platform negotiates the following response formats:
 - XML: `application/xml`
 - YAML: `application/x-yaml`
 
-Swagger UI is available at [`/docs`](https://api.ddev.site/docs) in development
+Swagger UI is available at [`/docs`](https://dj-api.ddev.site/docs) in development
 and test environments. The OpenAPI document is available at
 `/docs.jsonopenapi`. The docs are public so they can be viewed before login,
 but protected API operations still require a JWT. Documentation and the API
@@ -270,8 +270,9 @@ ddev exec vendor/bin/codecept run Functional
 ddev exec vendor/bin/codecept run Acceptance
 ```
 
-Acceptance tests use PhpBrowser against `https://api.ddev.site` and require a
-running DDEV environment. CI runs only the Unit and Functional suites.
+Acceptance tests use PhpBrowser against `https://dj-api.ddev.site` and require a
+running DDEV environment. CI runs the Unit and Functional suites separately;
+Acceptance tests are excluded because the workflow does not start DDEV.
 
 Run one functional test file with:
 
@@ -283,6 +284,10 @@ Codeception shuffles tests by default. Functional tests use the Symfony test
 kernel and Doctrine cleanup between tests. `tests/bootstrap.php` configures
 the SQLite test database and generates ephemeral RSA keys under
 `var/test-jwt/`.
+
+The API account scenarios in `tests/Functional/UserProfile.feature` run against
+the test kernel. The Acceptance suite contains only smoke tests against the
+running DDEV site.
 
 ## Where To Start
 

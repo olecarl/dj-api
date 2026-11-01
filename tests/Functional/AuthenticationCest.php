@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Entity\User;
 use App\Tests\Support\FunctionalTester;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class AuthenticationCest
 {
     public function testValidCredentialsReturnJwtAndAllowApiAccess(FunctionalTester $I): void
     {
-        $user = $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $user = $I->haveUser('user@example.com', 'correct horse battery staple');
         $this->sendLogin($I, 'user@example.com', 'correct horse battery staple');
 
         $I->seeResponseCodeIs(200);
@@ -29,7 +26,7 @@ final class AuthenticationCest
 
     public function testInvalidPasswordIsRejected(FunctionalTester $I): void
     {
-        $this->createUser($I, 'user@example.com', 'correct horse battery staple');
+        $I->haveUser('user@example.com', 'correct horse battery staple');
         $this->sendLogin($I, 'user@example.com', 'wrong password');
 
         $I->seeResponseCodeIs(401);
@@ -54,17 +51,5 @@ final class AuthenticationCest
     {
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPost('/login_check', ['username' => $email, 'password' => $password]);
-    }
-
-    private function createUser(FunctionalTester $I, string $email, string $password): User
-    {
-        $user = (new User())->setEmail($email);
-        $user->setPassword($I->grabService(UserPasswordHasherInterface::class)->hashPassword($user, $password));
-
-        $entityManager = $I->grabService(EntityManagerInterface::class);
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        return $user;
     }
 }

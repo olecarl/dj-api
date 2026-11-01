@@ -1,8 +1,17 @@
-# Feature Reference
+# Feature List
 
 This document describes the currently implemented application features. It is
 kept separate from the README so the README can focus on setup and contributor
 orientation while this file provides a compact behavior reference.
+
+## At a glance
+
+- Stateless, RSA-signed JWT authentication for API clients.
+- Read-only user and profile resources with ownership-based access.
+- A separate session-based dashboard for browser users.
+- Interactive CLI account creation with email, password, and role validation.
+- JSON-LD, HAL, JSON:API, JSON, XML, and YAML responses with OpenAPI documentation.
+- Configurable CORS, 50-item maximum pagination, and production-disabled API docs.
 
 ## API Authentication
 
@@ -18,7 +27,7 @@ orientation while this file provides a compact behavior reference.
 Example:
 
 ```bash
-curl -X POST https://api.ddev.site/login_check \
+curl -X POST https://dj-api.ddev.site/login_check \
     -H 'Content-Type: application/json' \
     -d '{"username":"user@example.com","password":"your-password"}'
 ```
@@ -75,6 +84,7 @@ The profile API is read-only:
 
 `UserProfileProvider` loads the linked user and profile and returns a profile
 DTO containing a nested public user DTO. A missing user or profile returns 404.
+The nested user DTO does not expose the password hash.
 
 ## Browser Dashboard
 
@@ -110,6 +120,7 @@ profiler are disabled in production.
 Nelmio CORS handles requests under `/` and permits configured origins from
 `CORS_ALLOW_ORIGIN`. Supported methods include GET, OPTIONS, POST, PUT, PATCH,
 and DELETE. `Content-Type` and `Authorization` are accepted request headers.
+Preflight responses advertise the configured methods and headers.
 
 ## CLI User Creation
 
@@ -132,12 +143,21 @@ ddev console app:user:create [email] [--role=ROLE_NAME]
 - Tests use SQLite at `data/database_test.sqlite`.
 - Doctrine migrations contain SQLite-specific paths where required.
 - Unit and Functional tests run in CI.
-- Acceptance tests target the live `https://api.ddev.site` environment and are
-  intended for local DDEV runs.
+- Acceptance tests use PhpBrowser against the local `https://dj-api.ddev.site`
+  environment and require DDEV to be running.
+- CI runs Unit and Functional tests; Acceptance tests are local-only.
 - PHP CS Fixer, PHPStan, Psalm, container linting, Twig linting, and Doctrine
   schema validation are part of the development pipeline.
 
-See `tests/Functional/ApiContractCest.php`,
+## Test Coverage Map
+
+| Suite | Coverage |
+|-------|----------|
+| Unit | Entities, providers, repositories, API configuration, and CLI validation |
+| Functional | Authentication, API contracts and security, validation, pagination, CORS, OpenAPI, and Gherkin account scenarios |
+| Acceptance | HTTP smoke checks against the running DDEV site |
+
+The Gherkin account scenarios are in `tests/Functional/UserProfile.feature`.
+Other executable examples include `tests/Functional/ApiContractCest.php`,
 `tests/Functional/UserResourceCest.php`, and
-`tests/Functional/UserProfileResourceCest.php` for executable examples of the
-API behavior described here.
+`tests/Functional/UserProfileResourceCest.php`.

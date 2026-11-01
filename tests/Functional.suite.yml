@@ -15,3 +15,7 @@ modules:
         - Doctrine:
             depends: Symfony
             cleanup: true
+gherkin:
+    contexts:
+        default:
+            - App\Tests\Support\Step\Functional\UserProfileSteps

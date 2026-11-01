@@ -12,7 +12,7 @@ Security fixes are currently provided for the supported `1.x` release line.
 ## Reporting a Vulnerability
 
 Please report suspected vulnerabilities privately through the repository's
-[GitHub Security Advisories](https://github.com/olecarl/api/security/advisories/new)
+[GitHub Security Advisories](https://github.com/olecarl/dj-api/security/advisories/new)
 feature. Do not open a public issue containing security-sensitive details.
 
 We will assess reports as soon as practical. If a report is accepted, we will
